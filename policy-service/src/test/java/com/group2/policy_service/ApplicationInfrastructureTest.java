@@ -51,14 +51,8 @@ public class ApplicationInfrastructureTest {
         Queue pQueue = config.purchaseQueue();
         assertEquals(RabbitConfig.PURCHASE_QUEUE, pQueue.getName());
 
-        Queue sQueue = config.paymentStatusQueue();
-        assertEquals(RabbitConfig.PAYMENT_STATUS_QUEUE, sQueue.getName());
-
         Binding pBinding = config.purchaseBinding(pQueue, exchange);
         assertNotNull(pBinding);
-
-        Binding sBinding = config.paymentStatusBinding(sQueue, exchange);
-        assertNotNull(sBinding);
 
         assertNotNull(config.converter());
         

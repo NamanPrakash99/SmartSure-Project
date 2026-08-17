@@ -30,9 +30,7 @@ public class AdminController {
         this.adminService = adminService;
     }
 
-    // ==================== CLAIM APIs ====================
-
-    // Claim Review API (Approve / Reject)
+    // Claim Review API (Approve / Reject - PRD E.8)
     @PutMapping("/claims/{id}/review")
     public ResponseEntity<String> reviewClaim(
             @PathVariable("id") Long id,
@@ -42,27 +40,7 @@ public class AdminController {
         return ResponseEntity.ok("Claim reviewed successfully");
     }
 
-    // Get Claim Status
-    @GetMapping("/claims/status/{id}")
-    public ResponseEntity<ClaimStatusDTO> getStatus(@PathVariable("id") Long id) {
-        return ResponseEntity.ok(adminService.getClaimStatus(id));
-    }
-
-    // Get all claims for a specific user
-    @GetMapping("/claims/user/{userId}")
-    public ResponseEntity<List<ClaimDTO>> getClaimsByUser(@PathVariable("userId") Long userId) {
-        return ResponseEntity.ok(adminService.getClaimsByUserId(userId));
-    }
-
-    // Download a claim's uploaded document
-    @GetMapping(value = "/claims/{id}/document", produces = {
-            "application/pdf", "image/jpeg", "image/png", "application/octet-stream"
-    })
-    public ResponseEntity<byte[]> downloadDocument(@PathVariable("id") Long id) {
-        return adminService.downloadClaimDocument(id);
-    }
-
-    // Get all claims with pagination
+    // Get all claims with pagination (PRD C)
     @GetMapping("/claims")
     public ResponseEntity<Object> getAllClaims(
             @RequestParam(name = "page", defaultValue = "0") int page,
@@ -75,67 +53,13 @@ public class AdminController {
         }
     }
 
-    // Update claim details
-    @PutMapping("/claims/{id}")
-    public ResponseEntity<Object> updateClaim(
-            @PathVariable("id") Long id,
-            @RequestBody ClaimDTO dto) {
-        try {
-            return ResponseEntity.ok(adminService.updateClaim(id, dto));
-        } catch (Exception e) {
-            logger.error("❌ Error in AdminController.updateClaim: {}", e.getMessage(), e);
-            return ResponseEntity.status(500).body("Error: " + e.getMessage());
-        }
-    }
-
-    @DeleteMapping("/claims/{id}")
-    public ResponseEntity<String> deleteClaim(@PathVariable("id") Long id) {
-        adminService.deleteClaim(id);
-        return ResponseEntity.ok("Claim deleted successfully");
-    }
-
-    // ==================== POLICY PRODUCT MANAGEMENT ====================
-
-    @PostMapping("/policies")
-    public ResponseEntity<PolicyDTO> createPolicy(@RequestBody PolicyRequestDTO dto) {
-        return ResponseEntity.ok(adminService.createPolicy(dto));
-    }
-
-    @PutMapping("/policies/{id}")
-    public ResponseEntity<PolicyDTO> updatePolicy(
-            @PathVariable("id") Long id,
-            @RequestBody PolicyRequestDTO dto) {
-        return ResponseEntity.ok(adminService.updatePolicy(id, dto));
-    }
-
-    @DeleteMapping("/policies/{id}")
-    public ResponseEntity<String> deletePolicy(@PathVariable("id") Long id) {
-        adminService.deletePolicy(id);
-        return ResponseEntity.ok("Policy deleted successfully");
-    }
-
-    @GetMapping("/user-policies/{userId}")
-    public ResponseEntity<java.util.List<Object>> getUserPolicies(@PathVariable("userId") Long userId) {
-        return ResponseEntity.ok(adminService.getUserPolicies(userId));
-    }
-
-    @GetMapping("/user-policies/all")
-    public ResponseEntity<java.util.List<Object>> getAllUserPolicies() {
-        return ResponseEntity.ok(adminService.getAllUserPolicies());
-    }
-
-    @PutMapping("/policies/{id}/cancel")
-    public ResponseEntity<Object> cancelUserPolicy(@PathVariable("id") Long id) {
-        return ResponseEntity.ok(adminService.cancelPolicy(id));
-    }
-
-    // ==================== CUSTOMER MANAGEMENT ====================
-
+    // Get all registered customers (PRD C)
     @GetMapping("/customers")
     public ResponseEntity<List<UserDTO>> getAllCustomers() {
         return ResponseEntity.ok(adminService.getAllCustomers());
     }
 
+    // Operational Reports & Business Analytics (PRD E.10)
     @GetMapping("/reports")
     public ResponseEntity<ReportResponse> getReports() {
         return ResponseEntity.ok(adminService.getReports());

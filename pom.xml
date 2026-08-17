@@ -13,12 +13,10 @@
     <description>Root Aggregator for SmartSure Microservices</description>
 
     <modules>
-        <module>config-server</module>
         <module>eureka-server</module>
         <module>api-gateway</module>
         <module>auth-service</module>
         <module>policy-service</module>
-        <module>payment-service</module>
         <module>claims-service</module>
         <module>admin-service</module>
     </modules>
@@ -40,11 +38,6 @@
             </plugins>
         </pluginManagement>
         <plugins>
-            <plugin>
-                <groupId>org.sonarsource.scanner.maven</groupId>
-                <artifactId>sonar-maven-plugin</artifactId>
-                <version>3.10.0.2594</version>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -87,19 +80,6 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <sonar.cpd.exclusions>**/*DTO.java,**/*Entity.java,**/*Exception.java,**/*Request.java,**/*Response.java</sonar.cpd.exclusions>
-        <sonar.coverage.exclusions>
-            **/exception/**,
-            **/config/**,
-            **/filter/**,
-            **/security/**,
-            **/*Application.java
-        </sonar.coverage.exclusions>
-        <sonar.exclusions>
-            config-server/**,
-            eureka-server/**
-        </sonar.exclusions>
-        <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/../target/site/jacoco-aggregate/jacoco.xml,${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 
 </project>

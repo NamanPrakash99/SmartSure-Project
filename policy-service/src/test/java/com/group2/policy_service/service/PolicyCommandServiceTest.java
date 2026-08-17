@@ -136,7 +136,7 @@ public class PolicyCommandServiceTest {
         saved.setId(100L);
         saved.setUserId(1L);
         saved.setPolicy(policy);
-        saved.setStatus(PolicyStatus.PENDING_PAYMENT);
+        saved.setStatus(PolicyStatus.ACTIVE);
 
         when(policyRepository.findById(10L)).thenReturn(Optional.of(policy));
         when(userPolicyRepository.existsByUserIdAndPolicyIdAndStatus(1L, 10L, PolicyStatus.ACTIVE)).thenReturn(false);
@@ -145,7 +145,7 @@ public class PolicyCommandServiceTest {
         UserPolicyResponseDTO result = policyCommandService.purchasePolicy(10L);
 
         assertNotNull(result);
-        assertEquals(PolicyStatus.PENDING_PAYMENT, result.getStatus());
+        assertEquals(PolicyStatus.ACTIVE, result.getStatus());
         verify(rabbitTemplate).convertAndSend(eq(RabbitConfig.EXCHANGE), eq(RabbitConfig.PURCHASE_ROUTING_KEY), any(PolicyPurchaseEvent.class));
     }
 

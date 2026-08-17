@@ -12,8 +12,5 @@ public interface AuthService {
     User register(RegisterRequest request);
     AuthResponse login(LoginRequest request);
     User getUserById(Long id);
-    void forgotPassword(String email);
-    void resetPassword(String token, String newPassword);
     List<User> getAllCustomers();
-    User updateUser(Long id, UpdateProfileRequest updateRequest);
 }

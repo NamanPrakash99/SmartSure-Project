@@ -14,9 +14,7 @@ public class RabbitConfig {
 
     public static final String EXCHANGE = "policy.exchange";
     public static final String PURCHASE_QUEUE = "policy.purchase.queue";
-    public static final String PAYMENT_STATUS_QUEUE = "payment.status.queue";
     public static final String PURCHASE_ROUTING_KEY = "policy.purchase.started";
-    public static final String PAYMENT_STATUS_ROUTING_KEY = "payment.status.updated";
 
     @Bean
     public DirectExchange exchange() {
@@ -29,18 +27,8 @@ public class RabbitConfig {
     }
 
     @Bean
-    public Queue paymentStatusQueue() {
-        return new Queue(PAYMENT_STATUS_QUEUE);
-    }
-
-    @Bean
     public Binding purchaseBinding(@Qualifier("purchaseQueue") Queue purchaseQueue, DirectExchange exchange) {
         return BindingBuilder.bind(purchaseQueue).to(exchange).with(PURCHASE_ROUTING_KEY);
-    }
-
-    @Bean
-    public Binding paymentStatusBinding(@Qualifier("paymentStatusQueue") Queue paymentStatusQueue, DirectExchange exchange) {
-        return BindingBuilder.bind(paymentStatusQueue).to(exchange).with(PAYMENT_STATUS_ROUTING_KEY);
     }
 
     @Bean

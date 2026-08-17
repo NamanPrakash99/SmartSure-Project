@@ -18,16 +18,12 @@
 [![Redux Toolkit](https://img.shields.io/badge/Redux_Toolkit-2.11-764ABC?style=flat-square&logo=redux&logoColor=white)](https://redux-toolkit.js.org/)
 [![Vite](https://img.shields.io/badge/Vite-8.0-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vitejs.dev/)
 
-[![Prometheus](https://img.shields.io/badge/Prometheus-Monitoring-E6522C?style=flat-square&logo=prometheus&logoColor=white)](https://prometheus.io/)
-[![Grafana](https://img.shields.io/badge/Grafana-Dashboards-F46800?style=flat-square&logo=grafana&logoColor=white)](https://grafana.com/)
-[![Elasticsearch](https://img.shields.io/badge/ELK_Stack-Logging-005571?style=flat-square&logo=elastic&logoColor=white)](https://www.elastic.co/)
-[![Zipkin](https://img.shields.io/badge/Zipkin-Tracing-FE7A16?style=flat-square&logo=&logoColor=white)](https://zipkin.io/)
 [![Spring Cloud](https://img.shields.io/badge/Spring_Cloud-Microservices-6DB33F?style=flat-square&logo=spring&logoColor=white)](https://spring.io/cloud)
 [![Gemini AI](https://img.shields.io/badge/Gemini_AI-Chatbot-4285F4?style=flat-square&logo=googlegemini&logoColor=white)](https://ai.google.dev/)
 
 <br/>
 
-> A production-grade, full-stack **Insurance Management Platform** built with a **Spring Boot Microservices** backend and a **React + TypeScript** frontend. Featuring JWT authentication with silent token refresh, Razorpay payment integration, AI-powered chatbot, role-based access control, and full observability via the ELK Stack, Prometheus & Grafana.
+> A production-grade, full-stack **Insurance Management Platform** built with a **Spring Boot Microservices** backend and a **React + TypeScript** frontend. Featuring JWT authentication with silent token refresh, Razorpay payment integration, AI-powered chatbot, and role-based access control.
 
 </div>
 
@@ -119,45 +115,7 @@ SmartSure follows a **Microservices Architecture** pattern, where each business 
 | ![React Hook Form](https://img.shields.io/badge/-React%20Hook%20Form-EC5990?style=flat-square&logo=reacthookform&logoColor=white) | Performant form handling |
 | ![Zod](https://img.shields.io/badge/-Zod-3E67B1?style=flat-square&logo=zod&logoColor=white) | Schema-based form validation |
 
-### Observability
-
-| Technology | Purpose |
-|:---|:---|
-| ![Prometheus](https://img.shields.io/badge/-Prometheus-E6522C?style=flat-square&logo=prometheus&logoColor=white) | Metrics collection |
-| ![Grafana](https://img.shields.io/badge/-Grafana-F46800?style=flat-square&logo=grafana&logoColor=white) | Metrics visualization |
-| ![Elasticsearch](https://img.shields.io/badge/-Elasticsearch-005571?style=flat-square&logo=elasticsearch&logoColor=white) | Log storage & search |
-| ![Logstash](https://img.shields.io/badge/-Logstash-005571?style=flat-square&logo=logstash&logoColor=white) | Log pipeline |
-| ![Kibana](https://img.shields.io/badge/-Kibana-005571?style=flat-square&logo=kibana&logoColor=white) | Log visualization |
-| ![Zipkin](https://img.shields.io/badge/-Zipkin-FE7A16?style=flat-square) | Distributed tracing |
-
----
-
-## ✨ Key Features
-
-### 🧑‍💼 Customer Portal
-- 🔐 Secure Registration & Login with OTP verification
-- 🔑 Forgot Password & Reset Password flow
-- 📋 Browse, compare and purchase insurance policies
-- 💳 **Razorpay** payment integration for secure premium payments
-- 📂 File insurance claims with document upload support
-- 📊 Personal dashboard with policy & claim statistics
-- 🤖 **AI-Powered Chatbot** (Google Gemini) for instant support
-
-### 👨‍💻 Admin Portal
-- 📊 Admin dashboard with aggregate statistics & charts
-- 📋 Full policy lifecycle management (CRUD)
-- ✅ Claims review & approval/rejection workflow
-- 👥 View & manage user policies
-- 📈 Comprehensive analytics & reports
-
-### 🏗️ Platform-Wide
-- 🔄 **Silent JWT Token Refresh** — seamless session management
-- 🛡️ **Role-based Access Control (RBAC)** — `ADMIN` & `CUSTOMER`
-- 📡 **Event-Driven Architecture** — RabbitMQ for async workflows
-- ⚡ **Redis Caching** — high-performance data retrieval
-- 🔁 **Spring Retry with Exponential Backoff** — fault tolerance
 - 🐳 **Fully Dockerized** — one-command deployment
-- 📈 **Full Observability** — ELK + Prometheus + Grafana + Zipkin
 - 🌙 **Dark Mode** support across the entire UI
 - 📱 **Responsive Design** — mobile-first Tailwind CSS
 
@@ -405,21 +363,6 @@ public PolicyStatsDto recoverPolicyStats(Exception e) {
 
 ---
 
-## 📊 Observability & Monitoring
-
-SmartSure includes a complete observability stack configured via `docker-compose.yml`.
-
-| Tool | Port | Purpose |
-|:---|:---|:---|
-| **Prometheus** | `:9090` | Scrapes `/actuator/prometheus` from all 8 services |
-| **Grafana** | `:3000` | Custom dashboards for JVM, HTTP, and business metrics |
-| **Elasticsearch** | `:9200` | Centralized log storage |
-| **Logstash** | `:5044` | Log ingestion pipeline |
-| **Kibana** | `:5601` | Log search & visualization |
-| **Zipkin** | `:9411` | Distributed request tracing across microservices |
-
----
-
 ## 📁 Project Structure
 
 ```
@@ -429,14 +372,12 @@ SmartSure-Insurance-Management-System/
 ├── 🔐 auth-service/         # Authentication & Authorization
 ├── 📋 policy-service/       # Policy Management (CQRS)
 ├── 📁 claims-service/       # Claims Processing
-├── 💳 payment-service/      # Razorpay Payment Integration
 ├── 👥 admin-service/        # Admin Aggregation (Feign + Retry)
 ├── 📡 eureka-server/        # Service Discovery
 ├── ⚙️ config-server/        # Centralized Configuration
-├── 📊 observability/        # Prometheus & Logstash configs
 ├── 🎨 smartsure-frontend/   # React 19 + TypeScript + Vite
 │
-├── docker-compose.yml       # 15-container orchestration
+├── docker-compose.yml       # Container orchestration
 ├── pom.xml                  # Maven parent POM (multi-module)
 └── README.md
 ```

@@ -27,7 +27,6 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-
         ServerHttpRequest request = exchange.getRequest();
 
         // Skip validation for open endpoints (login, register, swagger, actuator)
@@ -36,39 +35,32 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         }
 
         // Check for Authorization header
-        if (!request.getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
-            exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-            return exchange.getResponse().setComplete();
-        }
-
         String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-            return exchange.getResponse().setComplete();
+            return unauthorized(exchange);
         }
 
-        String token = authHeader.substring(7);
-
         try {
+            String token = authHeader.substring(7);
             jwtUtil.validateToken(token);
 
             // Forward user info as headers to downstream services
-            String userId = jwtUtil.extractUserId(token);
-            String role = jwtUtil.extractRole(token);
-            String email = jwtUtil.extractEmail(token);
-
             ServerHttpRequest modifiedRequest = request.mutate()
-                    .header("X-User-Id", userId)
-                    .header("X-User-Role", role)
-                    .header("X-User-Email", email)
+                    .header("X-User-Id", jwtUtil.extractUserId(token))
+                    .header("X-User-Role", jwtUtil.extractRole(token))
+                    .header("X-User-Email", jwtUtil.extractEmail(token))
                     .build();
 
             return chain.filter(exchange.mutate().request(modifiedRequest).build());
 
         } catch (Exception e) {
-            exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-            return exchange.getResponse().setComplete();
+            return unauthorized(exchange);
         }
+    }
+
+    private Mono<Void> unauthorized(ServerWebExchange exchange) {
+        exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+        return exchange.getResponse().setComplete();
     }
 
     @Override

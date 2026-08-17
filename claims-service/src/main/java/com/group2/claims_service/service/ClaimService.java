@@ -21,5 +21,4 @@ public interface ClaimService {
     ClaimStatsDTO getClaimStats();
     Page<ClaimResponseDTO> getAllClaims(Pageable pageable);
     ClaimResponseDTO updateClaim(Long claimId, ClaimRequestDTO dto);
-    void deleteClaim(Long claimId);
 }

@@ -393,17 +393,7 @@ public class ClaimServiceImpl implements ClaimService {
 	}
 
 
-	@org.springframework.transaction.annotation.Transactional
-	public void deleteClaim(Long claimId) {
-		Claim claim = claimRepository.findById(claimId)
-				.orElseThrow(() -> new ClaimNotFoundException("Claim not found with id: " + claimId));
-		
-		// Delete documents first
-		documentRepository.deleteByClaimId(claimId);
-		
-		// Delete claim
-		claimRepository.delete(claim);
-	}
+
 
 
 }

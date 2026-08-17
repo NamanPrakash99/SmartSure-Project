@@ -122,57 +122,10 @@ public class AuthServiceImpl implements AuthService {
 	            .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
 	}
 
-    @Transactional
-    public void forgotPassword(String email) {
-        // Handle case-insensitivity by looking up by lowercase if your DB doesn't handle it
-        User user = userRepository.findByEmail(email.toLowerCase())
-                .orElseGet(() -> userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("No user found with the email: " + email)));
 
-        // Delete existing tokens if any
-        tokenRepository.deleteByUser(user);
-
-        // Generate token
-        String token = java.util.UUID.randomUUID().toString();
-        com.group2.auth_service.entity.PasswordResetToken resetToken = 
-                new com.group2.auth_service.entity.PasswordResetToken(token, user);
-        
-        tokenRepository.save(resetToken);
-
-        // SEND REAL EMAIL VIA BREVO
-        emailService.sendResetPasswordEmail(user.getEmail(), token);
-
-        logger.info("Password reset link sent to: {}", user.getEmail());
-    }
-
-    @Transactional
-    public void resetPassword(String token, String newPassword) {
-        com.group2.auth_service.entity.PasswordResetToken resetToken = tokenRepository.findByToken(token)
-                .orElseThrow(() -> new RuntimeException("Invalid or expired token."));
-
-        if (resetToken.isExpired()) {
-            tokenRepository.delete(resetToken);
-            throw new RuntimeException("Token has expired.");
-        }
-
-        User user = resetToken.getUser();
-        user.setPassword(passwordEncoder.encode(newPassword));
-        userRepository.save(user);
-
-        // Delete token after successful reset
-        tokenRepository.delete(resetToken);
-    }
 
     public java.util.List<User> getAllCustomers() {
         return userRepository.findByRole(Role.CUSTOMER);
     }
 
-    @jakarta.transaction.Transactional
-    public User updateUser(Long id, UpdateProfileRequest updateRequest) {
-        User user = getUserById(id);
-        user.setName(updateRequest.getName());
-        user.setPhone(updateRequest.getPhone());
-        user.setAddress(updateRequest.getAddress());
-        return userRepository.save(user);
-    }
 }
