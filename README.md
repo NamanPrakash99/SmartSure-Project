@@ -234,6 +234,14 @@ cd admin-service && mvn spring-boot:run    # :8005
 cd api-gateway && mvn spring-boot:run      # :8888
 ```
 
+### Testing
+
+Run the test suite across all services using Maven:
+
+```bash
+mvn test
+```
+
 ---
 
 ## 🔌 API Endpoints
