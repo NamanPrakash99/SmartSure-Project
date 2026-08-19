@@ -4,12 +4,9 @@ import com.group2.auth_service.dto.AuthResponse;
 import com.group2.auth_service.dto.LoginRequest;
 import com.group2.auth_service.dto.RegisterRequest;
 import com.group2.auth_service.dto.UpdateProfileRequest;
-import com.group2.auth_service.entity.PasswordResetToken;
-import com.group2.auth_service.entity.RefreshToken;
 import com.group2.auth_service.entity.Role;
 import com.group2.auth_service.entity.User;
 import com.group2.auth_service.repository.AuthServiceRepository;
-import com.group2.auth_service.repository.PasswordResetTokenRepository;
 import com.group2.auth_service.security.JwtUtil;
 import com.group2.auth_service.service.impl.AuthServiceImpl;
 import org.junit.jupiter.api.DisplayName;
@@ -37,15 +34,9 @@ class AuthServiceTest {
     @Mock
     private AuthServiceRepository userRepository;
     @Mock
-    private PasswordResetTokenRepository tokenRepository;
-    @Mock
     private PasswordEncoder passwordEncoder;
     @Mock
     private JwtUtil jwtUtil;
-    @Mock
-    private RefreshTokenService refreshTokenService;
-    @Mock
-    private EmailService emailService;
 
     @InjectMocks
     private AuthServiceImpl authService;
@@ -79,17 +70,12 @@ class AuthServiceTest {
         user.setRole(Role.CUSTOMER);
         user.setId(1L);
 
-        RefreshToken rt = new RefreshToken();
-        rt.setToken("refresh_token");
-
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
         when(jwtUtil.generateToken(anyString(), anyLong(), anyString())).thenReturn("jwt_token");
-        when(refreshTokenService.createRefreshToken(anyLong())).thenReturn(rt);
 
         AuthResponse response = authService.login(request);
         assertEquals("jwt_token", response.getToken());
-        assertEquals("refresh_token", response.getRefreshToken());
     }
 
     @Test
@@ -104,23 +90,7 @@ class AuthServiceTest {
         assertThrows(RuntimeException.class, () -> authService.login(request));
     }
 
-    @Test
-    @DisplayName("Should successfully reset password when token is valid")
-    void shouldResetPasswordSuccessfully() {
-        String token = "valid-token";
-        String newPassword = "NewPassword123";
-        User user = new User();
-        PasswordResetToken resetToken = new PasswordResetToken(token, user);
-        
-        when(tokenRepository.findByToken(token)).thenReturn(Optional.of(resetToken));
-        when(passwordEncoder.encode(newPassword)).thenReturn("new_hashed_pass");
 
-        authService.resetPassword(token, newPassword);
-
-        verify(userRepository).save(user);
-        verify(tokenRepository).delete(resetToken);
-        assertEquals("new_hashed_pass", user.getPassword());
-    }
 
     @Test
     @DisplayName("Should update user profile details correctly")
@@ -204,13 +174,9 @@ class AuthServiceTest {
         user.setRole(Role.CUSTOMER);
         user.setId(1L);
 
-        RefreshToken rt = new RefreshToken();
-        rt.setToken("refresh_token");
-
         when(userRepository.findByEmail("test@test.com")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
         when(jwtUtil.generateToken(anyString(), anyLong(), anyString())).thenReturn("jwt_token");
-        when(refreshTokenService.createRefreshToken(anyLong())).thenReturn(rt);
 
         AuthResponse response = authService.login(request);
         assertEquals("jwt_token", response.getToken());
@@ -252,50 +218,7 @@ class AuthServiceTest {
         assertThrows(RuntimeException.class, () -> authService.getUserById(1L));
     }
 
-    @Test
-    @DisplayName("Should forgot password successfully")
-    void shouldForgotPasswordSuccessfully() {
-        User user = new User();
-        user.setEmail("test@test.com");
 
-        when(userRepository.findByEmail("test@test.com")).thenReturn(Optional.of(user));
-
-        authService.forgotPassword("TEST@test.com");
-
-        verify(tokenRepository).deleteByUser(user);
-        verify(tokenRepository).save(any(PasswordResetToken.class));
-        verify(emailService).sendResetPasswordEmail(eq("test@test.com"), anyString());
-    }
-
-    @Test
-    @DisplayName("Should throw exception when forgot password user not found")
-    void shouldThrowExceptionWhenForgotPasswordUserNotFound() {
-        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
-        assertThrows(RuntimeException.class, () -> authService.forgotPassword("test@test.com"));
-    }
-
-    @Test
-    @DisplayName("Should throw exception when reset password token expired")
-    void shouldThrowExceptionWhenResetPasswordTokenExpired() {
-        String token = "expired-token";
-        User user = new User();
-        PasswordResetToken resetToken = new PasswordResetToken(token, user);
-        
-        PasswordResetToken spyToken = spy(resetToken);
-        when(spyToken.isExpired()).thenReturn(true);
-
-        when(tokenRepository.findByToken(token)).thenReturn(Optional.of(spyToken));
-
-        assertThrows(RuntimeException.class, () -> authService.resetPassword(token, "NewPassword123"));
-        verify(tokenRepository).delete(spyToken);
-    }
-
-    @Test
-    @DisplayName("Should throw exception when reset password token not found")
-    void shouldThrowExceptionWhenResetPasswordTokenNotFound() {
-        when(tokenRepository.findByToken(anyString())).thenReturn(Optional.empty());
-        assertThrows(RuntimeException.class, () -> authService.resetPassword("invalid", "pass"));
-    }
 
     @Test
     @DisplayName("Should init admin when admin does not exist")

@@ -3,14 +3,12 @@ package com.group2.auth_service.dto;
 public class AuthResponse {
 
 	private String token;
-	private String refreshToken;
 	private String role;
 	private Long id;
 	private String name;
 
-	public AuthResponse(String token, String refreshToken, String role, Long id, String name) {
+	public AuthResponse(String token, String role, Long id, String name) {
 		this.token = token;
-		this.refreshToken = refreshToken;
 		this.role = role;
 		this.id = id;
 		this.name = name;
@@ -45,14 +43,6 @@ public class AuthResponse {
 
 	public void setToken(String token) {
 		this.token = token;
-	}
-
-	public String getRefreshToken() {
-		return refreshToken;
-	}
-
-	public void setRefreshToken(String refreshToken) {
-		this.refreshToken = refreshToken;
 	}
 
 	public String getRole() {

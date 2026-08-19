@@ -12,12 +12,8 @@ import com.group2.auth_service.dto.UpdateProfileRequest;
 import com.group2.auth_service.entity.Role;
 import com.group2.auth_service.entity.User;
 import com.group2.auth_service.repository.AuthServiceRepository;
-import com.group2.auth_service.repository.PasswordResetTokenRepository;
-import com.group2.auth_service.entity.RefreshToken;
 import com.group2.auth_service.security.JwtUtil;
 import com.group2.auth_service.service.AuthService;
-import com.group2.auth_service.service.EmailService;
-import com.group2.auth_service.service.RefreshTokenService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,24 +24,15 @@ public class AuthServiceImpl implements AuthService {
     private static final Logger logger = LoggerFactory.getLogger(AuthServiceImpl.class);
 
 	private final AuthServiceRepository userRepository;
-	private final PasswordResetTokenRepository tokenRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtUtil jwtUtil;
-	private final RefreshTokenService refreshTokenService;
-	private final EmailService emailService;
 
 	public AuthServiceImpl(AuthServiceRepository userRepository, 
-	                  PasswordResetTokenRepository tokenRepository,
 	                  PasswordEncoder passwordEncoder, 
-	                  JwtUtil jwtUtil,
-	                  RefreshTokenService refreshTokenService,
-	                  EmailService emailService) {
+	                  JwtUtil jwtUtil) {
 		this.userRepository = userRepository;
-		this.tokenRepository = tokenRepository;
 		this.passwordEncoder = passwordEncoder;
 		this.jwtUtil = jwtUtil;
-		this.refreshTokenService = refreshTokenService;
-		this.emailService = emailService;
 	}
 	
 	@PostConstruct
@@ -109,8 +96,7 @@ public class AuthServiceImpl implements AuthService {
 
 		if (passwordEncoder.matches(request.getPassword(), user.getPassword())) {
 			String token = jwtUtil.generateToken(user.getEmail(), user.getId(), user.getRole().name());
-			RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
-			return new AuthResponse(token, refreshToken.getToken(), user.getRole().name(), user.getId(), user.getName());
+			return new AuthResponse(token, user.getRole().name(), user.getId(), user.getName());
 		} else {
 			logger.warn("Login Failed: Password does not match for email: {}", email);
 			throw new RuntimeException("Invalid credentials: Password is incorrect.");

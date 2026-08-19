@@ -29,7 +29,7 @@ public class ClaimReviewListener {
             claimService.updateClaimStatus(event.getClaimId(), dto);
             System.out.println("Successfully processed claim review for Claim ID: " + event.getClaimId());
         } catch (Exception e) {
-            System.err.println("❌ Failed to process Claim Review Event: " + e.getMessage());
+            System.err.println("Failed to process Claim Review Event: " + e.getMessage());
         }
     }
 }

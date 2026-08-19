@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 import com.group2.policy_service.dto.PolicyRequestDTO;
 import com.group2.policy_service.dto.PolicyResponseDTO;
@@ -48,8 +51,12 @@ public class PolicyController {
     }
     
     @GetMapping("/admin/user-policies/{userId}")
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN') or principal.toString() == #userId.toString()")
-    public List<UserPolicyResponseDTO> getUserPolicies(@PathVariable("userId") Long userId) {
+    public List<UserPolicyResponseDTO> getUserPolicies(@PathVariable("userId") Long userId,
+            @RequestHeader(value="X-User-Role", required=false) String role,
+            @RequestHeader(value="X-User-Id", required=false) String headerUserId) {
+        if (!"ADMIN".equals(role) && (headerUserId == null || !headerUserId.equals(userId.toString()))) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access Denied");
+        }
         return policyService.getPoliciesByUserId(userId);
     }
 
@@ -61,32 +68,37 @@ public class PolicyController {
     // --- COMMAND ENDPOINTS ---
 
     @PostMapping("/policies/purchase")
-    public UserPolicyResponseDTO purchasePolicy(@RequestParam("policyId") Long policyId) {
-        return policyService.purchasePolicy(policyId);
+    public UserPolicyResponseDTO purchasePolicy(@RequestParam("policyId") Long policyId,
+            @RequestHeader(value="X-User-Id", required=true) String userId) {
+        return policyService.purchasePolicy(policyId, Long.parseLong(userId));
     }
 
     @PostMapping("/admin/policies")
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
-    public PolicyResponseDTO createPolicy(@RequestBody PolicyRequestDTO dto) {
+    public PolicyResponseDTO createPolicy(@RequestBody PolicyRequestDTO dto,
+            @RequestHeader(value="X-User-Role", required=false) String role) {
+        if (!"ADMIN".equals(role)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access Denied");
         return policyService.createPolicy(dto);
     }
 
     @PutMapping("/admin/policies/{id}")
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
     public PolicyResponseDTO updatePolicy(@PathVariable("id") Long id,
-                                          @RequestBody PolicyRequestDTO dto) {
+                                          @RequestBody PolicyRequestDTO dto,
+                                          @RequestHeader(value="X-User-Role", required=false) String role) {
+        if (!"ADMIN".equals(role)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access Denied");
         return policyService.updatePolicy(id, dto);
     }
 
     @DeleteMapping("/admin/policies/{id}")
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
-    public void deletePolicy(@PathVariable("id") Long id) {
+    public void deletePolicy(@PathVariable("id") Long id,
+            @RequestHeader(value="X-User-Role", required=false) String role) {
+        if (!"ADMIN".equals(role)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access Denied");
         policyService.deletePolicy(id);
     }
 
     @PutMapping("/admin/policies/{id}/cancel")
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<UserPolicyResponseDTO> cancelPolicy(@PathVariable("id") Long id) {
+    public ResponseEntity<UserPolicyResponseDTO> cancelPolicy(@PathVariable("id") Long id,
+            @RequestHeader(value="X-User-Role", required=false) String role) {
+        if (!"ADMIN".equals(role)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access Denied");
         return ResponseEntity.ok(policyService.cancelPolicy(id));
     }
 }

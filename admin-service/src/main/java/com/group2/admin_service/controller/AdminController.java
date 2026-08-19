@@ -5,8 +5,11 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
+
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 import com.group2.admin_service.dto.ClaimDTO;
 import com.group2.admin_service.dto.ClaimStatusDTO;
@@ -17,7 +20,7 @@ import com.group2.admin_service.dto.ReviewRequest;
 import com.group2.admin_service.dto.UserDTO;
 import com.group2.admin_service.service.AdminService;
 
-@PreAuthorize("hasRole('ADMIN')")
+
 @RestController
 @RequestMapping("/api/admin")
 public class AdminController {
@@ -34,8 +37,9 @@ public class AdminController {
     @PutMapping("/claims/{id}/review")
     public ResponseEntity<String> reviewClaim(
             @PathVariable("id") Long id,
-            @RequestBody ReviewRequest request) {
-
+            @RequestBody ReviewRequest request,
+            @RequestHeader(value="X-User-Role", required=false) String role) {
+        if (!"ADMIN".equals(role)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access Denied");
         adminService.reviewClaim(id, request);
         return ResponseEntity.ok("Claim reviewed successfully");
     }
@@ -44,7 +48,9 @@ public class AdminController {
     @GetMapping("/claims")
     public ResponseEntity<Object> getAllClaims(
             @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", defaultValue = "10") int size) {
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            @RequestHeader(value="X-User-Role", required=false) String role) {
+        if (!"ADMIN".equals(role)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access Denied");
         try {
             return ResponseEntity.ok(adminService.getAllClaims(page, size));
         } catch (Exception e) {
@@ -55,13 +61,17 @@ public class AdminController {
 
     // Get all registered customers (PRD C)
     @GetMapping("/customers")
-    public ResponseEntity<List<UserDTO>> getAllCustomers() {
+    public ResponseEntity<List<UserDTO>> getAllCustomers(
+            @RequestHeader(value="X-User-Role", required=false) String role) {
+        if (!"ADMIN".equals(role)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access Denied");
         return ResponseEntity.ok(adminService.getAllCustomers());
     }
 
     // Operational Reports & Business Analytics (PRD E.10)
     @GetMapping("/reports")
-    public ResponseEntity<ReportResponse> getReports() {
+    public ResponseEntity<ReportResponse> getReports(
+            @RequestHeader(value="X-User-Role", required=false) String role) {
+        if (!"ADMIN".equals(role)) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access Denied");
         return ResponseEntity.ok(adminService.getReports());
     }
 }

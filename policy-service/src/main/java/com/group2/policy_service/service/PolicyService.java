@@ -18,7 +18,7 @@ public interface PolicyService {
     UserPolicyResponseDTO getUserPolicyById(Long id);
 
     // Command Methods
-    UserPolicyResponseDTO purchasePolicy(Long policyId);
+    UserPolicyResponseDTO purchasePolicy(Long policyId, Long userId);
     PolicyResponseDTO createPolicy(PolicyRequestDTO dto);
     PolicyResponseDTO updatePolicy(Long id, PolicyRequestDTO dto);
     void deletePolicy(Long id);

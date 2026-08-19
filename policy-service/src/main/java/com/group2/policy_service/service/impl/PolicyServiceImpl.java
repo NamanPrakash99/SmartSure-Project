@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
@@ -99,8 +98,7 @@ public class PolicyServiceImpl implements PolicyService {
     // ================= COMMAND METHODS =================
 
     @CacheEvict(value = "userPolicies", allEntries = true)
-    public UserPolicyResponseDTO purchasePolicy(Long policyId) {
-        Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    public UserPolicyResponseDTO purchasePolicy(Long policyId, Long userId) {
 
         Policy policy = policyRepository.findById(policyId)
                 .orElseThrow(() -> new RuntimeException("Policy not found"));
