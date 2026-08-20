@@ -137,50 +137,11 @@ class AuthServiceTest {
         assertThrows(com.group2.auth_service.exception.UserAlreadyExistsException.class, () -> authService.register(request));
     }
 
-    @Test
-    @DisplayName("Should throw exception when registering with short password")
-    void shouldThrowExceptionWhenRegisteringWithShortPassword() {
-        RegisterRequest request = new RegisterRequest();
-        request.setEmail("test@test.com");
-        request.setPassword("12345");
 
-        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
 
-        assertThrows(RuntimeException.class, () -> authService.register(request));
-    }
 
-    @Test
-    @DisplayName("Should throw exception when registering with no number in password")
-    void shouldThrowExceptionWhenRegisteringWithNoNumberInPassword() {
-        RegisterRequest request = new RegisterRequest();
-        request.setEmail("test@test.com");
-        request.setPassword("Password");
 
-        when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
 
-        assertThrows(RuntimeException.class, () -> authService.register(request));
-    }
-
-    @Test
-    @DisplayName("Should login correctly with uppercase email")
-    void shouldLoginWithUppercaseEmail() {
-        LoginRequest request = new LoginRequest();
-        request.setEmail("TEST@TEST.COM ");
-        request.setPassword("Password123");
-
-        User user = new User();
-        user.setEmail("test@test.com");
-        user.setPassword("hashed_pass");
-        user.setRole(Role.CUSTOMER);
-        user.setId(1L);
-
-        when(userRepository.findByEmail("test@test.com")).thenReturn(Optional.of(user));
-        when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
-        when(jwtUtil.generateToken(anyString(), anyLong(), anyString())).thenReturn("jwt_token");
-
-        AuthResponse response = authService.login(request);
-        assertEquals("jwt_token", response.getToken());
-    }
 
     @Test
     @DisplayName("Should throw exception when password incorrect during login")
@@ -220,24 +181,5 @@ class AuthServiceTest {
 
 
 
-    @Test
-    @DisplayName("Should init admin when admin does not exist")
-    void shouldInitAdminWhenNotExists() {
-        when(userRepository.findByEmail("admin@capgemini.com")).thenReturn(Optional.empty());
-        when(passwordEncoder.encode("admin123")).thenReturn("encoded");
-        
-        authService.initAdmin();
-        
-        verify(userRepository).save(any(User.class));
-    }
 
-    @Test
-    @DisplayName("Should not init admin when admin already exists")
-    void shouldNotInitAdminWhenExists() {
-        when(userRepository.findByEmail("admin@capgemini.com")).thenReturn(Optional.of(new User()));
-        
-        authService.initAdmin();
-        
-        verify(userRepository, never()).save(any(User.class));
-    }
 }

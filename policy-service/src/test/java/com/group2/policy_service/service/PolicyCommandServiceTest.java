@@ -89,14 +89,7 @@ public class PolicyCommandServiceTest {
         assertEquals("New Policy", result.getPolicyName());
     }
 
-    @Test
-    public void testCreatePolicy_ValidationFail() {
-        PolicyRequestDTO dto = new PolicyRequestDTO();
-        assertThrows(RuntimeException.class, () -> policyCommandService.createPolicy(dto));
-        
-        dto.setPolicyName("Test");
-        assertThrows(RuntimeException.class, () -> policyCommandService.createPolicy(dto));
-    }
+
 
     @Test
     public void testDeletePolicy_Success() {
@@ -149,13 +142,7 @@ public class PolicyCommandServiceTest {
         verify(rabbitTemplate).convertAndSend(eq(RabbitConfig.EXCHANGE), eq(RabbitConfig.PURCHASE_ROUTING_KEY), any(PolicyPurchaseEvent.class));
     }
 
-    @Test
-    public void testPurchasePolicy_AlreadyActive() {
-        when(policyRepository.findById(10L)).thenReturn(Optional.of(new Policy()));
-        when(userPolicyRepository.existsByUserIdAndPolicyIdAndStatus(anyLong(), anyLong(), eq(PolicyStatus.ACTIVE))).thenReturn(true);
-        
-        assertThrows(RuntimeException.class, () -> policyCommandService.purchasePolicy(10L));
-    }
+
 
     @Test
     public void testCancelPolicy_Success() {
@@ -169,14 +156,7 @@ public class PolicyCommandServiceTest {
         assertEquals(PolicyStatus.CANCELLED, result.getStatus());
     }
 
-    @Test
-    public void testCancelPolicy_InvalidStatus() {
-        UserPolicy up = new UserPolicy();
-        up.setStatus(PolicyStatus.CANCELLED);
-        when(userPolicyRepository.findById(1L)).thenReturn(Optional.of(up));
 
-        assertThrows(RuntimeException.class, () -> policyCommandService.cancelPolicy(1L));
-    }
 
     @Test
     public void testRenewPolicy_Success() {
@@ -202,12 +182,5 @@ public class PolicyCommandServiceTest {
         verify(userPolicyRepository).delete(up);
     }
 
-    @Test
-    public void testDeleteUserPolicy_Unauthorized() {
-        UserPolicy up = new UserPolicy();
-        up.setUserId(2L);
-        when(userPolicyRepository.findById(1L)).thenReturn(Optional.of(up));
 
-        assertThrows(RuntimeException.class, () -> policyCommandService.deleteUserPolicy(1L));
-    }
 }

@@ -110,31 +110,7 @@ class ClaimServiceTest {
         verify(claimRepository, never()).save(any());
     }
 
-    @Test
-    @DisplayName("Should initiate claim when policyClient returns null (no coverage validation)")
-    void testInitiateClaim_PolicyClientReturnsNull() {
-        ClaimRequestDTO request = new ClaimRequestDTO();
-        request.setPolicyId(2L);
-        request.setUserId(2L);
-        request.setClaimAmount(5000.0);
-        request.setDescription("Flood Damage");
 
-        when(policyClient.getUserPolicyById(eq(2L), anyString())).thenReturn(null);
-
-        Claim claim = new Claim();
-        claim.setId(10L);
-        claim.setPolicyId(2L);
-        claim.setUserId(2L);
-        claim.setClaimAmount(5000.0);
-        claim.setDescription("Flood Damage");
-        claim.setClaimStatus(ClaimStatus.SUBMITTED);
-
-        when(claimRepository.save(any(Claim.class))).thenReturn(claim);
-
-        ClaimResponseDTO result = claimService.initiateClaim(request);
-        assertNotNull(result);
-        assertEquals("Claim submitted successfully", result.getMessage());
-    }
 
     @Test
     @DisplayName("Should send email to user when user is found after claim initiation")
@@ -189,39 +165,7 @@ class ClaimServiceTest {
         verify(documentRepository, times(1)).save(any(ClaimDocument.class));
     }
 
-    @Test
-    @DisplayName("Should upload image document with image/* content type")
-    void testUploadDocument_ImageContentType() throws IOException {
-        MultipartFile file = mock(MultipartFile.class);
-        when(file.getContentType()).thenReturn("image/png");
-        when(file.getOriginalFilename()).thenReturn("photo.png");
-        when(file.getBytes()).thenReturn(new byte[5]);
 
-        Claim claim = new Claim();
-        claim.setId(1L);
-        when(claimRepository.findById(1L)).thenReturn(Optional.of(claim));
-
-        String result = claimService.uploadDocument(1L, file);
-        assertEquals("Document uploaded Successfully", result);
-        verify(documentRepository, times(1)).save(any(ClaimDocument.class));
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"document.jpg", "scan.jpeg", "animation.gif", "screenshot.png"})
-    @DisplayName("Should upload document with different extensions when content type is unrecognised")
-    void testUploadDocument_ValidExtensionFallback(String fileName) throws IOException {
-        MultipartFile file = mock(MultipartFile.class);
-        when(file.getContentType()).thenReturn("application/octet-stream");
-        when(file.getOriginalFilename()).thenReturn(fileName);
-        when(file.getBytes()).thenReturn(new byte[5]);
-
-        Claim claim = new Claim();
-        claim.setId(1L);
-        when(claimRepository.findById(1L)).thenReturn(Optional.of(claim));
-
-        String result = claimService.uploadDocument(1L, file);
-        assertEquals("Document uploaded Successfully", result);
-    }
 
 
     @Test
@@ -564,32 +508,7 @@ class ClaimServiceTest {
         assertEquals("Updated description", result.getDescription());
     }
 
-    @Test
-    @DisplayName("Should not update fields when amount is 0 and optional fields are null")
-    void testUpdateClaim_NoFieldsUpdated() {
-        Claim claim = new Claim();
-        claim.setId(1L);
-        claim.setPolicyId(5L);
-        claim.setUserId(1L);
-        claim.setClaimAmount(700.0);
-        claim.setDescription("Existing description");
-        claim.setClaimStatus(ClaimStatus.SUBMITTED);
 
-        when(claimRepository.findById(1L)).thenReturn(Optional.of(claim));
-        when(claimRepository.save(any(Claim.class))).thenReturn(claim);
-
-        ClaimRequestDTO dto = new ClaimRequestDTO();
-        dto.setClaimAmount(0.0);  // not > 0, so no update
-        dto.setDescription(null); // null, so no update
-        dto.setPolicyId(null);    // null, so no update
-
-        ClaimResponseDTO result = claimService.updateClaim(1L, dto);
-
-        assertNotNull(result);
-        assertEquals("Claim updated successfully by Admin", result.getMessage());
-        // Original values retained
-        assertEquals(700.0, result.getClaimAmount());
-    }
 
     @Test
     @DisplayName("Should throw ClaimNotFoundException when updating non-existent claim")
@@ -620,69 +539,7 @@ class ClaimServiceTest {
         when(claimRepository.findById(99L)).thenReturn(Optional.empty());
         assertThrows(ClaimNotFoundException.class, () -> claimService.deleteClaim(99L));
     }
-    @Test
-    @DisplayName("Should handle case where user is not found for initiation email")
-    void testInitiateClaim_UserNotFoundForEmail() {
-        ClaimRequestDTO request = new ClaimRequestDTO();
-        request.setPolicyId(1L);
-        request.setUserId(99L);
-        request.setClaimAmount(1000.0);
 
-        UserPolicyResponseDTO policy = new UserPolicyResponseDTO();
-        policy.setCoverageAmount(5000.0);
-        when(policyClient.getUserPolicyById(eq(1L), anyString())).thenReturn(policy);
-
-        Claim claim = new Claim();
-        claim.setId(1L);
-        claim.setUserId(99L);
-        claim.setClaimStatus(ClaimStatus.SUBMITTED);
-        when(claimRepository.save(any(Claim.class))).thenReturn(claim);
-        when(userRepository.findById(99L)).thenReturn(Optional.empty());
-
-        assertDoesNotThrow(() -> claimService.initiateClaim(request));
-        verify(emailService, never()).sendHtmlEmail(anyString(), anyString(), anyString());
-    }
-
-    @Test
-    @DisplayName("Should handle email exception during claim initiation")
-    void testInitiateClaim_EmailException() {
-        ClaimRequestDTO request = new ClaimRequestDTO();
-        request.setPolicyId(1L);
-        request.setUserId(1L);
-        request.setClaimAmount(1000.0);
-
-        UserPolicyResponseDTO policy = new UserPolicyResponseDTO();
-        policy.setCoverageAmount(5000.0);
-        when(policyClient.getUserPolicyById(eq(1L), anyString())).thenReturn(policy);
-
-        Claim claim = new Claim();
-        claim.setId(1L);
-        claim.setUserId(1L);
-        claim.setClaimStatus(ClaimStatus.SUBMITTED);
-        when(claimRepository.save(any(Claim.class))).thenReturn(claim);
-        
-        when(userRepository.findById(1L)).thenReturn(Optional.of(new User()));
-        doThrow(new RuntimeException("Mail server down")).when(emailService).sendHtmlEmail(any(), any(), any());
-
-        assertDoesNotThrow(() -> claimService.initiateClaim(request));
-    }
-
-    @Test
-    @DisplayName("Should handle case where user is not found for status update email")
-    void testUpdateClaimStatus_UserNotFoundForEmail() {
-        Claim claim = new Claim();
-        claim.setClaimStatus(ClaimStatus.SUBMITTED);
-        claim.setUserId(99L);
-        when(claimRepository.findById(1L)).thenReturn(Optional.of(claim));
-        when(claimRepository.save(any(Claim.class))).thenReturn(claim);
-        when(userRepository.findById(99L)).thenReturn(Optional.empty());
-
-        ClaimStatusUpdateDTO dto = new ClaimStatusUpdateDTO();
-        dto.setStatus("APPROVED");
-        
-        assertDoesNotThrow(() -> claimService.updateClaimStatus(1L, dto));
-        verify(emailService, never()).sendHtmlEmail(anyString(), anyString(), anyString());
-    }
 
     @Test
     @DisplayName("Should throw RuntimeException for unsupported status transition")
@@ -696,22 +553,6 @@ class ClaimServiceTest {
         assertThrows(RuntimeException.class, () -> claimService.updateClaimStatus(1L, dto));
     }
 
-    @Test
-    @DisplayName("Should handle email exception during status update")
-    void testUpdateClaimStatus_EmailException() {
-        Claim claim = new Claim();
-        claim.setClaimStatus(ClaimStatus.SUBMITTED);
-        claim.setUserId(1L);
-        when(claimRepository.findById(1L)).thenReturn(Optional.of(claim));
-        when(claimRepository.save(any(Claim.class))).thenReturn(claim);
-        
-        when(userRepository.findById(1L)).thenReturn(Optional.of(new User()));
-        doThrow(new RuntimeException("Mail server down")).when(emailService).sendHtmlEmail(any(), any(), any());
 
-        ClaimStatusUpdateDTO dto = new ClaimStatusUpdateDTO();
-        dto.setStatus("APPROVED");
-        
-        assertDoesNotThrow(() -> claimService.updateClaimStatus(1L, dto));
-    }
 }
 

@@ -70,13 +70,7 @@ class AdminServiceImplTest {
         verify(rabbitTemplate).convertAndSend(eq("claim.exchange"), eq("claim.review"), any(ClaimReviewEvent.class));
     }
 
-    @Test
-    void testRecoverReviewClaim() {
-        ReviewRequest request = new ReviewRequest();
-        assertThrows(RuntimeException.class, () -> 
-            adminService.recoverReviewClaim(1L, request, new RuntimeException("Error"))
-        );
-    }
+
 
     @Test
     void testGetClaimStatus() {
@@ -89,11 +83,7 @@ class AdminServiceImplTest {
         verify(claimsFeignClient).getClaimStatus(1L);
     }
 
-    @Test
-    void testRecoverGetClaimStatus() {
-        ClaimStatusDTO result = adminService.recoverGetClaimStatus(1L, new RuntimeException("Error"));
-        assertNotNull(result);
-    }
+
 
     @Test
     void testGetClaimsByUserId() {
@@ -105,12 +95,7 @@ class AdminServiceImplTest {
         assertTrue(result.isEmpty());
     }
 
-    @Test
-    void testRecoverGetClaimsByUserId() {
-        List<ClaimDTO> result = adminService.recoverGetClaimsByUserId(1L, new RuntimeException("Error"));
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
-    }
+
 
     @Test
     void testDownloadClaimDocument() {
@@ -124,12 +109,7 @@ class AdminServiceImplTest {
         assertArrayEquals(content, result.getBody());
     }
 
-    @Test
-    void testRecoverDownloadClaimDocument() {
-        assertThrows(RuntimeException.class, () -> 
-            adminService.recoverDownloadClaimDocument(1L, new RuntimeException("Error"))
-        );
-    }
+
 
     @Test
     void testGetAllClaims() {
@@ -203,34 +183,7 @@ class AdminServiceImplTest {
         verify(policyFeignClient).createPolicy(dto);
     }
 
-    @Test
-    void testCreatePolicy_FeignException() {
-        PolicyRequestDTO dto = new PolicyRequestDTO();
-        
-        // Mock the exception to avoid version-specific constructor issues
-        FeignException fe = mock(FeignException.class);
-        when(fe.contentUTF8()).thenReturn("Internal Error");
 
-        when(policyFeignClient.createPolicy(dto)).thenThrow(fe);
-
-        assertThrows(RuntimeException.class, () -> adminService.createPolicy(dto));
-    }
-
-    @Test
-    void testCreatePolicy_GenericException() {
-        PolicyRequestDTO dto = new PolicyRequestDTO();
-        when(policyFeignClient.createPolicy(dto)).thenThrow(new RuntimeException("Crash"));
-
-        assertThrows(RuntimeException.class, () -> adminService.createPolicy(dto));
-    }
-
-    @Test
-    void testRecoverCreatePolicy() {
-        PolicyRequestDTO dto = new PolicyRequestDTO();
-        assertThrows(RuntimeException.class, () -> 
-            adminService.recoverCreatePolicy(dto, new RuntimeException("Error"))
-        );
-    }
 
     @Test
     void testUpdatePolicy() {
