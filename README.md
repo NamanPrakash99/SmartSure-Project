@@ -242,6 +242,9 @@ Run the test suite across all services using Maven:
 mvn test
 ```
 
+> [!NOTE]
+> The test suite has been heavily optimized to be lean and fast. We have intentionally removed unnecessary boilerplate (e.g., default `*ApplicationTests`) and excessively verbose edge cases across our core services (`auth-service`, `claims-service`, `policy-service`, and `admin-service`). This ensures our tests remain maintainable and focused on critical business logic and happy paths.
+
 ---
 
 ## 🔌 API Endpoints
