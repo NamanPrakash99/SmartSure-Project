@@ -85,8 +85,7 @@ SmartSure follows a **Microservices Architecture** pattern, where each business 
 ### 🔐 Auth Service (`:8002`)
 Handles the complete authentication lifecycle.
 - User registration with OTP verification
-- JWT access token & refresh token generation
-- Password reset via email (token-based)
+- JWT access token generation
 - Redis-backed session management
 
 ### 📋 Policy Service (`:8004`)
@@ -126,21 +125,17 @@ Netflix Eureka-based service discovery registry.
 
 ## 🔐 Security Architecture
 
-SmartSure implements a multi-layered security model across the backend services.
+SmartSure implements a centralized security model at the API Gateway.
 
 ```
 ┌──────────────────────────────────────────────────────────┐
 │                    SECURITY LAYERS                       │
 ├──────────────────────────────────────────────────────────┤
 │                                                          │
-│  Layer 1: API Gateway Filter                             │
+│  API Gateway Filter                                      │
 │  ├─ JWT signature verification                           │
 │  ├─ Role extraction & route validation                   │
 │  └─ Rejects invalid/expired tokens with 403              │
-│                                                          │
-│  Layer 2: Service-Level Security                         │
-│  ├─ GatewaySecurityFilter on each microservice           │
-│  └─ Validates X-User-Id and X-User-Role headers          │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
 ```
@@ -148,15 +143,11 @@ SmartSure implements a multi-layered security model across the backend services.
 ### Token Lifecycle
 
 ```
-Client Login → Auth Service generates Access Token (15 min) + Refresh Token (days)
+Client Login → Auth Service generates Access Token
      │
      ├─ Every API call → Client attaches Bearer token
      │
-     ├─ Token expires → 401 received
-     │     │
-     │     └─ Client requests new Token via /auth/refresh-token
-     │
-     └─ Refresh Token expires → Full login required
+     └─ Token expires → 401 received (Full login required)
 ```
 
 ---
@@ -251,9 +242,7 @@ mvn test
 |:---|:---|:---|
 | `POST` | `/register` | Register a new user |
 | `POST` | `/login` | Authenticate & receive JWT |
-| `POST` | `/refresh-token` | Refresh access token |
-| `POST` | `/forgot-password` | Request password reset email |
-| `POST` | `/reset-password` | Reset password with token |
+
 
 ### Policy Service (`/policy-service/api`)
 | Method | Endpoint | Description |
