@@ -237,31 +237,44 @@ mvn test
 
 ## 🔌 API Endpoints
 
-### Auth Service (`/auth-service/api/auth`)
+### Auth Service (`/api/auth`)
 | Method | Endpoint | Description |
 |:---|:---|:---|
-| `POST` | `/register` | Register a new user |
 | `POST` | `/login` | Authenticate & receive JWT |
+| `POST` | `/register` | Register a new user |
 
-
-### Policy Service (`/policy-service/api`)
+### Policy Service (`/api`)
 | Method | Endpoint | Description |
 |:---|:---|:---|
 | `GET` | `/policies` | List all available policies |
-| `GET` | `/policies/:id` | Get policy details |
+| `GET` | `/policy-types` | Get policy types |
+| `GET` | `/policies/{policyId}` | Get policy details |
+| `GET` | `/admin/user-policies/{userId}` | Get user policies by user ID |
+| `GET` | `/admin/user-policies/all` | Get all user policies |
 | `POST` | `/policies/purchase` | Purchase a policy |
-| `POST` | `/policies/renew/:id` | Renew a policy |
 | `POST` | `/admin/policies` | Create policy template (Admin) |
-| `PUT` | `/admin/policies/:id` | Update policy template (Admin) |
-| `DELETE` | `/admin/policies/:id` | Delete policy template (Admin) |
+| `PUT` | `/admin/policies/{id}` | Update policy template (Admin) |
+| `DELETE` | `/admin/policies/{id}` | Delete policy template (Admin) |
+| `PUT` | `/admin/policies/{id}/cancel` | Cancel a policy (Admin) |
 
-### Claims Service (`/claims-service/api`)
+### Claims Service (`/api/claims`)
 | Method | Endpoint | Description |
 |:---|:---|:---|
-| `POST` | `/claims` | File a new claim |
-| `GET` | `/claims/user/:userId` | Get user's claims |
-| `GET` | `/claims/:id` | Get claim details |
-| `PUT` | `/claims/:id/review` | Review claim (Admin) |
+| `POST` | `/initiate` | File a new claim |
+| `POST` | `/upload` | Upload claim document |
+| `GET` | `/{claimId}/document` | Get claim document |
+| `GET` | `/status/{claimId}` | Get claim status |
+| `PUT` | `/{claimId}/status` | Update claim status |
+| `GET` | `/user/{userId}` | Get user's claims |
+| `GET` | `/admin/all` | Get all claims (Admin) |
+
+### Admin Service (`/api/admin`)
+| Method | Endpoint | Description |
+|:---|:---|:---|
+| `GET` | `/claims` | Get all claims |
+| `GET` | `/customers` | Get all customers |
+| `GET` | `/reports` | Get system reports |
+| `PUT` | `/claims/{id}/review` | Review a claim |
 
 ---
 
